@@ -52,6 +52,14 @@ class _Emitter:
         self.active: set[int] = set()
 
     def scalar(self, value: Any, key: bool = False) -> str:
+        if isinstance(value, str):
+            if self.default_style == "'":
+                return "'" + value.replace("'", "''") + "'"
+            if not self.allow_unicode and any(ord(char) > 127 for char in value):
+                return json.dumps(value, ensure_ascii=True)
+            if self.default_style == '"' or not _plain_string(value):
+                return quote(value)
+            return value
         if value is None:
             return "null"
         if value is True:
@@ -71,19 +79,13 @@ class _Emitter:
             return value.isoformat(sep=" ") if isinstance(value, datetime.datetime) else value.isoformat()
         if isinstance(value, bytes):
             return "!!binary " + quote(base64.b64encode(value).decode("ascii"))
-        if not isinstance(value, str):
-            raise RepresenterError(f"cannot represent an object of type {type(value).__name__}")
-        if self.default_style == "'":
-            return "'" + value.replace("'", "''") + "'"
-        if not self.allow_unicode and any(ord(char) > 127 for char in value):
-            return json.dumps(value, ensure_ascii=True)
-        if self.default_style == '"' or not _plain_string(value):
-            return quote(value)
-        return value
+        raise RepresenterError(f"cannot represent an object of type {type(value).__name__}")
 
     def is_collection(self, value: Any) -> bool:
+        if isinstance(value, (str, bytes, bytearray)):
+            return False
         return isinstance(value, Mapping) or (
-            isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray))
+            isinstance(value, Sequence)
         )
 
     def flow_value(self, value: Any) -> str:
@@ -129,26 +131,28 @@ class _Emitter:
                 result = []
                 for key, item in self.items(value):
                     key_text = self.scalar(key, key=True)
-                    if self.is_collection(item) and item:
+                    item_is_collection = self.is_collection(item)
+                    if item_is_collection and item:
                         result.append(" " * level + key_text + ":")
                         result.extend(self.lines(item, level + self.indent))
                     else:
                         result.append(
                             " " * level + key_text + ": " +
-                            (self.flow_value(item) if self.is_collection(item) else self.scalar(item))
+                            (self.flow_value(item) if item_is_collection else self.scalar(item))
                         )
                 return result
             if not value:
                 return [" " * level + "[]"]
             result = []
             for item in value:
-                if self.is_collection(item) and item:
+                item_is_collection = self.is_collection(item)
+                if item_is_collection and item:
                     result.append(" " * level + "-")
                     result.extend(self.lines(item, level + self.indent))
                 else:
                     result.append(
                         " " * level + "- " +
-                        (self.flow_value(item) if self.is_collection(item) else self.scalar(item))
+                        (self.flow_value(item) if item_is_collection else self.scalar(item))
                     )
             return result
         finally:

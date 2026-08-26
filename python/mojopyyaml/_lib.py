@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import ctypes
-import json
 import os
 import subprocess
+from json.encoder import encode_basestring
 
 import numpy as np
 
@@ -65,7 +65,7 @@ def scan_lines(data: bytes) -> np.ndarray:
 
 def quote(text: str) -> str:
     if len(text) < 256:
-        return json.dumps(text, ensure_ascii=False)
+        return encode_basestring(text)
     data = text.encode("utf-8")
     if len(data) > MAX_ABI_LENGTH:
         raise OverflowError("encoded string is too large for the native ABI")

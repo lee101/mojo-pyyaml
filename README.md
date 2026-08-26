@@ -77,13 +77,13 @@ and the benchmark checks behavioral equality before timing.
 
 | case | mojo-pyyaml | PyYAML | speedup |
 | --- | ---: | ---: | ---: |
-| load flat mapping (25k pairs) | 425.5 ms | 2812.0 ms | 6.61x |
-| load records (5k mappings) | 208.5 ms | 1161.1 ms | 5.57x |
-| dump flat mapping (25k pairs) | 201.2 ms | 947.8 ms | 4.71x |
-| dump quoted scalar (2.0 MB) | 17.9 ms | 1856.1 ms | 103.64x |
-| load flow sequence (25k scalars) | 120.6 ms | 785.0 ms | 6.51x |
-| load quoted scalar (2.0 MB) | 109.4 ms | 2042.8 ms | 18.68x |
-| dump quoted sequence (25k scalars) | 103.6 ms | 695.3 ms | 6.71x |
+| load flat mapping (25k pairs) | 226.3 ms | 1537.6 ms | 6.80x |
+| load records (5k mappings) | 132.6 ms | 1099.1 ms | 8.29x |
+| dump flat mapping (25k pairs) | 85.8 ms | 938.0 ms | 10.93x |
+| dump quoted scalar (2.0 MB) | 16.7 ms | 1790.8 ms | 107.54x |
+| load flow sequence (25k scalars) | 118.8 ms | 779.6 ms | 6.56x |
+| load quoted scalar (2.0 MB) | 74.5 ms | 1781.9 ms | 23.92x |
+| dump quoted sequence (25k scalars) | 20.4 ms | 490.7 ms | 24.11x |
 
 The reference is PyYAML's default pure-Python `SafeLoader`/`SafeDumper`, which
 are what its `safe_load`/`safe_dump` convenience functions call. Optional
