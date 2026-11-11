@@ -24,7 +24,7 @@ def scan_line_metadata(
     var end = Int(ends[line])
     var indent = 0
     while start + indent + BYTE_SIMD_WIDTH <= end:
-        var chunk = source.load[width=BYTE_SIMD_WIDTH, alignment=1](start + indent)
+        var chunk = source.unsafe_load[width=BYTE_SIMD_WIDTH, alignment=1](start + indent)
         if not chunk.eq(UInt8(32)).reduce_and():
             break
         indent += BYTE_SIMD_WIDTH
@@ -32,7 +32,7 @@ def scan_line_metadata(
         indent += 1
     var trimmed = end
     while trimmed - BYTE_SIMD_WIDTH >= start + indent:
-        var chunk = source.load[width=BYTE_SIMD_WIDTH, alignment=1](trimmed - BYTE_SIMD_WIDTH)
+        var chunk = source.unsafe_load[width=BYTE_SIMD_WIDTH, alignment=1](trimmed - BYTE_SIMD_WIDTH)
         var spaces = (
             chunk.eq(UInt8(32)) |
             chunk.eq(UInt8(9)) |
@@ -69,7 +69,7 @@ def scan_lines(
     var pos = 0
     starts[0] = Int64(0)
     while pos + BYTE_SIMD_WIDTH <= n:
-        var chunk = source.load[width=BYTE_SIMD_WIDTH, alignment=1](pos)
+        var chunk = source.unsafe_load[width=BYTE_SIMD_WIDTH, alignment=1](pos)
         var newlines = chunk.eq(UInt8(10))
         if newlines.reduce_or():
             comptime for lane in range(BYTE_SIMD_WIDTH):
